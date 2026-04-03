@@ -11,26 +11,6 @@ const sqlite3 = require('sqlite3');
 const app = express();
 app.use(express.json());
 
-// Middleware de autenticación
-const apiKeyAuth = (req, res, next) => {
-  const apiKey = req.headers['x-api-key'];
-  const validApiKey = process.env.API_KEY;
-
-  if (!validApiKey) {
-    console.warn('⚠️  Advertencia: API_KEY no está configurada en variables de entorno');
-    return next(); // Permitir si no está configurada (desarrollo)
-  }
-
-  if (!apiKey || apiKey !== validApiKey) {
-    return res.status(401).json({ 
-      error: 'No autorizado', 
-      mensaje: 'API Key inválida o faltante' 
-    });
-  }
-
-  next();
-};
-
 const sessions = new Map(); // clientId -> { sock, qr, status, authState }
 
 // Usar disco persistente de Render si está disponible, sino usar local
