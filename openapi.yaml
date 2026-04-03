@@ -1,15 +1,15 @@
 openapi: 3.0.3
 info:
   title: WhatsApp Document Sender API
-  version: "1.0.0"
-  description: API REST para enviar mensajes y documentos por WhatsApp. (Versión pública sin autenticación)
+  version: "1.0.1"
+  description: Public REST API to send WhatsApp text messages and documents. This spec does not require API key authentication.
 servers:
   - url: https://document-whatsapp-sender-api.onrender.com/
-    description: URL pública (reemplaza por tu URL de Render)
+    description: Production server
 paths:
   /connect/{clientId}:
     post:
-      summary: Conectar cliente y generar QR
+      summary: Connect client and generate QR
       parameters:
         - name: clientId
           in: path
@@ -18,13 +18,13 @@ paths:
             type: string
       responses:
         '200':
-          description: Estado de conexión o QR
+          description: Connection state and QR data if needed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConnectResponse'
     get:
-      summary: Consultar estado de conexión
+      summary: Get connection status
       parameters:
         - name: clientId
           in: path
@@ -33,14 +33,14 @@ paths:
             type: string
       responses:
         '200':
-          description: Estado de la sesión
+          description: Current session status
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConnectResponse'
   /qr/{clientId}:
     get:
-      summary: Obtener imagen PNG del QR
+      summary: Get QR image as PNG
       parameters:
         - name: clientId
           in: path
@@ -49,21 +49,21 @@ paths:
             type: string
       responses:
         '200':
-          description: Imagen PNG del QR
+          description: PNG QR image
           content:
             image/png:
               schema:
                 type: string
                 format: binary
         '404':
-          description: No hay QR disponible
+          description: QR not available
           content:
             text/html:
               schema:
                 type: string
   /send/{clientId}:
     post:
-      summary: Enviar documento o mensaje de texto
+      summary: Send text message or document
       parameters:
         - name: clientId
           in: path
@@ -76,27 +76,32 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SendRequest'
+            examples:
+              textMessage:
+                value:
+                  telefono: "506XXXXXXXX"
+                  caption: "Hello from the API"
+              documentMessage:
+                value:
+                  telefono: "506XXXXXXXX"
+                  url_documento: "https://example.com/document.pdf"
+                  caption: "Your document"
       responses:
         '200':
-          description: Mensaje enviado
+          description: Message sent
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SendResponse'
         '400':
-          description: Parámetros inválidos o cliente no conectado
+          description: Invalid input or disconnected client
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  estado:
-                    type: string
-                  mensaje:
-                    type: string
+                $ref: '#/components/schemas/ErrorResponse'
   /status/{clientId}:
     get:
-      summary: Estado simple de la sesión
+      summary: Get simple status
       parameters:
         - name: clientId
           in: path
@@ -105,7 +110,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Estado
+          description: Session status
           content:
             application/json:
               schema:
@@ -117,14 +122,17 @@ components:
       properties:
         telefono:
           type: string
-          description: Número destino (ej. 50671234567)
+          description: Target phone number with country code (no plus sign, no spaces).
+          example: "506XXXXXXXX"
         url_documento:
           type: string
           format: uri
-          description: URL pública del documento (opcional)
+          description: Public URL of the file to send (optional).
+          example: "https://example.com/document.pdf"
         caption:
           type: string
-          description: Texto o leyenda (opcional)
+          description: Optional text message or document caption.
+          example: "Optional caption"
       required:
         - telefono
     SendResponse:
@@ -135,10 +143,13 @@ components:
           example: enviado
         mensaje:
           type: string
+          example: Documento enviado correctamente
         id_mensaje:
           type: string
+          example: ABC123
         destinatario:
           type: string
+          example: "506XXXXXXXX"
     ConnectResponse:
       type: object
       properties:
@@ -147,18 +158,33 @@ components:
           example: needs-scan
         qr:
           type: string
-          description: Data URL del QR (base64) o null
+          nullable: true
+          description: Base64 PNG data URL or null.
         qr_url:
           type: string
-          description: URL pública para ver el QR
+          nullable: true
+          description: Public URL to open the QR in a browser.
         message:
           type: string
+          example: Scan the QR code
     StatusResponse:
       type: object
       properties:
         clientId:
           type: string
+          example: my-client
         status:
           type: string
+          example: connected
         connected:
           type: boolean
+          example: true
+    ErrorResponse:
+      type: object
+      properties:
+        estado:
+          type: string
+          example: fallido
+        mensaje:
+          type: string
+          example: Cliente no conectado

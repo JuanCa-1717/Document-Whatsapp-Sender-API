@@ -1,103 +1,110 @@
-# WhatsApp Document Sender — Client Documentation
+# WhatsApp Document Sender API
 
-Base URL
-- https://document-whatsapp-sender-api.onrender.com/
+Generic client documentation for a REST API that sends WhatsApp messages and documents.
 
-Description
-- HTTP service to send WhatsApp messages and documents. Clients interact with the endpoints listed below; the WhatsApp session is managed on the server.
+Note: this document is in English. A few request/response field names remain in Spanish because they are part of the API contract.
 
-Quickstart (client example)
+## Overview
 
-- Connect a client (generates a QR if needed):
+This API allows clients to:
+- Create and manage a WhatsApp connection session
+- Retrieve QR code data for device linking
+- Send text messages
+- Send documents from a public file URL
+- Check session status
+
+## Base URL
+
+Use your own deployed endpoint:
+
+```text
+YOUR_API_BASE_URL
+```
+
+Example:
+
+```text
+https://your-domain.com
+```
+
+## Main Endpoints
+
+- `POST /connect/{clientId}`
+  - Creates or reconnects a client session and may return QR data.
+
+- `GET /connect/{clientId}`
+  - Returns detailed connection status.
+
+- `GET /qr/{clientId}`
+  - Returns QR code image (PNG) when available.
+
+- `POST /send/{clientId}`
+  - Sends text or a document.
+
+- `GET /status/{clientId}`
+  - Returns simplified status (`connected` true/false).
+
+## Request Example (Send Text)
+
 ```bash
-curl -X POST "https://document-whatsapp-sender-api.onrender.com/connect/my-client"
-```
-
-- Check connection status:
-```bash
-curl "https://document-whatsapp-sender-api.onrender.com/connect/my-client"
-```
-
-- View QR in the browser:
-```
-https://document-whatsapp-sender-api.onrender.com/qr/my-client
-```
-
-- Download QR as PNG:
-```bash
-curl -s "https://document-whatsapp-sender-api.onrender.com/qr/my-client" -o qr.png
-```
-
-- Send a text message:
-```bash
-curl -X POST "https://document-whatsapp-sender-api.onrender.com/send/my-client" \
+curl -X POST "YOUR_API_BASE_URL/send/my-client" \
   -H "Content-Type: application/json" \
-  -d '{"telefono":"506XXXXXXXX","caption":"Hello from the API"}'
+  -d '{"telefono":"COUNTRYCODE_NUMBER","caption":"Hello from API"}'
 ```
 
-- Send a document (server downloads the file and sends it):
+## Request Example (Send Document)
+
 ```bash
-curl -X POST "https://document-whatsapp-sender-api.onrender.com/send/my-client" \
+curl -X POST "YOUR_API_BASE_URL/send/my-client" \
   -H "Content-Type: application/json" \
-  -d '{"telefono":"506XXXXXXXX","url_documento":"https://example.com/doc.pdf","caption":"Your document"}'
+  -d '{"telefono":"COUNTRYCODE_NUMBER","url_documento":"https://example.com/file.pdf","caption":"Optional caption"}'
 ```
 
-- Simple session status:
-```bash
-curl "https://document-whatsapp-sender-api.onrender.com/status/my-client"
-```
-
-Endpoints (summary)
-
-- POST /connect/{clientId}
-  - Creates/connects a session and returns a QR if applicable.
-
-- GET /connect/{clientId}
-  - Returns session status and QR URL.
-
-- GET /qr/{clientId}
-  - Returns the QR as PNG (200) or 404 if not available.
-
-- POST /send/{clientId}
-  - Sends a text message or document. Request JSON (`telefono` required):
+## Body Fields for `/send/{clientId}`
 
 ```json
 {
-  "telefono": "506XXXXXXXX",
-  "url_documento": "https://example.com/doc.pdf",
-  "caption": "Caption text"
+  "telefono": "COUNTRYCODE_NUMBER",
+  "url_documento": "https://example.com/file.pdf",
+  "caption": "Optional text"
 }
 ```
 
-- GET /status/{clientId}
-  - Simple status: `{ clientId, status, connected }`.
+- `telefono` (required): destination number with country code, no spaces.
+- `url_documento` (optional): public file URL to send as document.
+- `caption` (optional): message text or document caption.
 
-Example responses
+## Contract Field Names (Must Keep)
 
-- Success (send):
+The following field names should not be translated in client integrations:
+
+- Request fields: `telefono`, `url_documento`, `caption`
+- Response fields: `estado`, `mensaje`, `id_mensaje`, `destinatario`
+
+## Example Responses
+
+Success (actual API response):
+
 ```json
 {
   "estado": "enviado",
   "mensaje": "Documento enviado correctamente",
   "id_mensaje": "ABC123",
-  "destinatario": "506XXXXXXXX"
+  "destinatario": "COUNTRYCODE_NUMBER"
 }
 ```
 
-- Failure (client not connected):
+Error (actual API response):
+
 ```json
-{ "estado": "fallido", "mensaje": "Cliente no conectado" }
+{
+  "estado": "fallido",
+  "mensaje": "Cliente no conectado"
+}
 ```
 
-Notes for clients
-- The WhatsApp session is managed on the server; clients only interact via HTTP.
-- If the hosting platform mounts persistent storage at `/data`, sessions survive restarts. Ask your provider if unsure.
+## Notes
 
-Support and limits
-- Define limits and SLA with the provider. For production we recommend rate-limiting and monitoring.
-
-Contact
-- For technical assistance or integrations, reply with your use case and we will provide tailored examples.
-
-
-*** End Patch
+- Keep the same `clientId` to reuse an existing linked session.
+- For production deployments, monitor uptime and logs.
+- Avoid exposing private infrastructure URLs or internal credentials in public docs.

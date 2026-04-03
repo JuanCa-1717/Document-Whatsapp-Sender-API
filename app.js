@@ -10,6 +10,12 @@ const sqlite3 = require('sqlite3');
 
 const app = express();
 app.use(express.json());
+app.use((req, res, next) => {
+  if (!req.headers['x-rapidapi-key']) {
+    return res.status(401).json({error: 'API Key required'});
+  }
+  next();
+});
 
 const sessions = new Map(); // clientId -> { sock, qr, status, authState }
 
