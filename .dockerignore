@@ -1,0 +1,10 @@
+node_modules
+sessions
+.git
+.cache
+*.log
+.env
+README.md
+test-api.js
+clean-sessions.js
+.gitignore

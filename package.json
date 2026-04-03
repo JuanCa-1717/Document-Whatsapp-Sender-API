@@ -1,0 +1,25 @@
+{
+  "name": "whatsapp-doc-sender-api",
+  "version": "2.0.0",
+  "description": "API REST para enviar documentos por WhatsApp usando Baileys (sin navegador)",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "clean": "node clean-sessions.js",
+    "test": "node test-api.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
+    "axios": "^1.7.9",
+    "sqlite3": "^5.1.7",
+    "express": "^4.21.2",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}

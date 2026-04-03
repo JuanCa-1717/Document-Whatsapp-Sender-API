@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: whatsapp-doc-sender-api
+    runtime: node
+    buildCommand: npm ci --only=production
+    startCommand: node app.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    disk:
+      name: whatsapp-sessions
+      mountPath: /data
+      sizeGB: 1
+
+

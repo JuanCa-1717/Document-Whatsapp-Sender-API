@@ -1,0 +1,27 @@
+node_modules/
+
+# Documentation (contains sensitive examples)
+API-DOCS.md
+README-CLIENT.md
+
+# Sensitive runtime data
+uploads/
+tokens/
+
+# Puppeteer cache
+.cache/
+
+# Test files
+test.txt
+test-send.js
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
